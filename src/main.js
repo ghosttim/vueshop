@@ -14,5 +14,3 @@ new Vue({
   render: (h) => h(App),
 }).$mount('#app');
 
-send(titleName);
-send(data.message);
