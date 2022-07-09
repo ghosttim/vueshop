@@ -56,12 +56,12 @@ export default {
     },
     nextPage(page) {
       if (page < this.pages + 1){
-        this.$emit('paginate', page);
+        this.paginate(page);
       }
     },
     prevPage(page) {
       if (this.page > 1) {
-        this.$emit('paginate', page);
+        this.paginate(page);
       }
     }
   }
