@@ -1,14 +1,14 @@
 <template>
   <component
     :is="currentPageComponent"
-    :page-params="currentPageParams"
-    @gotoPage="(PageName, PageParams) => gotoPage(PageName, PageParams)"/>
+    :page-params="currentPageParams"/>
 </template>
 
 <script>
 import MainPage from '@/pages/MainPage';
 import ProductPage from '@/pages/ProductPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import eventBus from '@/eventBus';
 
 const routes = {
   main: 'MainPage',
@@ -37,6 +37,9 @@ export default {
     MainPage,
     ProductPage,
     NotFoundPage
+  },
+  created() {
+    eventBus.$on('gotoPage', (pageName, pageParam) => this.gotoPage(pageName, pageParam));
   }
 };
 </script>
