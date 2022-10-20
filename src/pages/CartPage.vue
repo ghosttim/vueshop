@@ -1,5 +1,6 @@
 <template>
-  <main class="content container">
+  <main class="content container" v-if="productsLoading">Загрузка товаров...</main>
+  <main class="content container" v-else>
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
@@ -60,7 +61,8 @@ export default {
     ...mapGetters({
       products: 'cartDetailProducts',
       totalPrice: 'cartTotalPrice',
-      totalProducts: 'cartCountProducts'
+      totalProducts: 'cartCountProducts',
+      productsLoading: 'cartProductsLoading'
     }),
   }
 }

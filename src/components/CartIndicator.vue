@@ -3,12 +3,19 @@
     <svg width="30" height="21" fill="currentColor">
       <use xlink:href="#icon-cart"></use>
     </svg>
-    <span class="header__count" aria-label="Количество товаров">{{ $store.state.cartProducts.length}}</span>
+    <span class="header__count" aria-label="Количество товаров" v-if="productsLoading">Загрузка..</span>
+    <span class="header__count" aria-label="Количество товаров" v-else>{{ $store.state.cartProducts.length}}</span>
   </router-link>
 </template>
 
 <script>
-export default {
+import {mapGetters} from "vuex";
 
+export default {
+  computed: {
+    ...mapGetters({
+      productsLoading: 'cartProductsLoading'
+    }),
+  }
 }
 </script>
