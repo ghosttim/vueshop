@@ -28,14 +28,14 @@
     </div>
 
     <section class="cart">
-      <form class="cart__form form" action="#" method="POST">
+      <form class="cart__form form" action="#" method="POST" @submit.prevent="order">
         <div class="cart__field">
           <div class="cart__data">
             <BaseFormText v-model="formData.name" :error="formError.name" title="ФИО" placeholder="Введите ваше полное имя" />
             <BaseFormText v-model="formData.address" :error="formError.address" title="Адрес доставки" placeholder="Введите ваш адрес" />
             <BaseFormText v-model="formData.phone" :error="formError.phone" title="Телефон" placeholder="Введите ваш телефон" type="tel" />
             <BaseFormText v-model="formData.email" :error="formError.email" title="Email" placeholder="Введи ваш Email" type="email" />
-            <BaseFormTextarea v-model="formData.comments" :error="formError.comments" title="Комментарий к заказ" placeholder="Ваши пожелания" />
+            <BaseFormTextarea v-model="formData.comment" :error="formError.comment" title="Комментарий к заказ" placeholder="Ваши пожелания" />
           </div>
 
           <div class="cart__options">
@@ -91,14 +91,17 @@
             <p>Итого: <b>{{ totalProducts | numberFormat }}</b> товара на сумму <b>{{ totalPrice | numberFormat }}</b></p>
           </div>
 
-          <button class="cart__button button button--primery" type="submit">
+          <button class="cart__button button button--primery" type="submit"  :disabled="orderAddSending">
             Оформить заказ
           </button>
         </div>
-        <div class="cart__error form__error-block">
+
+        <img src="/img/preloader.gif" style="margin: 0 auto" v-show="orderAddSending">
+
+        <div class="cart__error form__error-block" v-if="formErrorMessage">
           <h4>Заявка не отправлена!</h4>
           <p>
-            Похоже произошла ошибка. Попробуйте отправить снова или перезагрузите страницу.
+            {{ formErrorMessage }}
           </p>
         </div>
       </form>
@@ -112,6 +115,8 @@
   import BaseFormTextarea from "@/components/BaseFormTextarea";
   import OrderItem from "@/components/OrderItem";
   import {mapGetters} from "vuex";
+  import axios from 'axios';
+  import {API_BASE_URL} from "@/config";
 
   export default {
     filters: {numberFormat},
@@ -124,6 +129,36 @@
       return {
         formData: {},
         formError: {},
+        formErrorMessage: '',
+        orderAddSending: false,
+      }
+    },
+    methods: {
+      order() {
+        this.formError = {};
+        this.formErrorMessage = '';
+        this.orderAddSending = true;
+
+        return (new Promise(resolvee => setTimeout(resolvee, 2000)))
+          .then(() => {
+            axios
+              .post(API_BASE_URL + '/api/orders', {
+                ...this.formData
+              },{
+                params: {
+                  userAccessKey: this.$store.state.userAccessKey
+                }
+              })
+              .then(() => {
+                this.$store.commit('resetCart');
+                this.orderAddSending = false;
+              })
+              .catch(error => {
+                this.formError = error.response.data.error.request || {};
+                this.formErrorMessage = error.response.data.error.message;
+                this.orderAddSending = false;
+              })
+          });
       }
     },
     computed: {
