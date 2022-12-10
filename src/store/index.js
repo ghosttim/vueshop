@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import axios from "axios";
 import {API_BASE_URL} from "@/config";
+//import {stat} from "@babel/core/lib/gensync-utils/fs";
 
 Vue.use(Vuex);
 
@@ -12,6 +13,7 @@ export default new Vuex.Store({
     userAccessKey: null,
     cartProductsData: [],
     cartProductsLoading: false,
+    orderInfo: false,
   },
   getters: {
     cartDetailProducts(state) {
@@ -27,6 +29,21 @@ export default new Vuex.Store({
         }
       })
     },
+    cartInfo(state) {
+      return state.orderInfo;
+    },
+    cartInfoProducts(state) {
+     if (state.orderInfo.basket === undefined) {
+       return [];
+     }
+
+      return state.orderInfo.basket.items.map(item => {
+        return {
+          ...item,
+          amount: item.quantity
+        };
+      });
+    },
     cartTotalPrice(state, getters) {
       return getters.cartDetailProducts.reduce((acc, item) => (item.product.price * item.amount) + acc, 0);
     },
@@ -38,6 +55,13 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    updateOrderInfo(state, orderInfo) {
+      state.orderInfo = orderInfo;
+    },
+    resetCart(state) {
+      state.cartProducts = [];
+      state.cartProductsData = [];
+    },
     updateCartProductAmount(state, {productId, amount}) {
       const item = state.cartProducts.find(item => item.productId === productId);
 
@@ -64,6 +88,16 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    loadOrderInfo(context, orderId) {
+      return axios.get(API_BASE_URL + '/api/orders/' + orderId, {
+        params: {
+          userAccessKey: context.state.userAccessKey
+        }
+      })
+        .then(response => {
+          context.commit('updateOrderInfo', response.data)
+        })
+    },
     loadCart(context) {
       context.commit('updateCartProductsLoading', true);
       return axios.get(API_BASE_URL + '/api/baskets', {
